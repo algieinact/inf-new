@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Activity extends Model
 {
@@ -33,6 +34,22 @@ class Activity extends Model
         'registration_deadline' => 'datetime',
     ];
 
+    public function getDiscountedPrice(): float
+    {
+        $basePrice = (float) ($this->price ?? 0);
+
+        if (!$this->discount_type || $this->discount_value === null) {
+            return $basePrice;
+        }
+
+        if ($this->discount_type === 'percentage') {
+            $discount = $basePrice * ((float) $this->discount_value) / 100.0;
+            return max(0.0, $basePrice - $discount);
+        }
+
+        return max(0.0, $basePrice - (float) $this->discount_value);
+    }
+
     public function provider() {
         return $this->belongsTo(User::class, 'provider_id');
     }
@@ -51,5 +68,16 @@ class Activity extends Model
 
     public function bookmarks() {
         return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
+
+    public function approvedRevenue(): float
+    {
+        return (float) DB::table('transactions')
+            ->join('bookings', 'transactions.booking_id', '=', 'bookings.id')
+            ->where('bookings.bookable_type', Activity::class)
+            ->where('bookings.bookable_id', $this->id)
+            ->where('bookings.status', 'approved')
+            ->where('transactions.payment_status', 'paid')
+            ->sum('transactions.final_amount');
     }
 }

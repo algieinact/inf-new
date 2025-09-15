@@ -201,7 +201,7 @@
     @endif
 
     <!-- Categories Section -->
-    @if($categories->count() > 0)
+    <!-- @if($categories->count() > 0)
     <section id="categories" class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -222,7 +222,7 @@
                 @endforeach
             </div>
         </div>
-    </section>
+    </section> -->
     @endif
 
 @endsection

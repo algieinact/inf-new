@@ -23,7 +23,7 @@ class BookingService
     {
         return DB::transaction(function () use ($data) {
             // Get bookable item
-            $bookableClass = $data['bookable_type'] === 'residence' ? Residence::class : Activity::class;
+            $bookableClass = in_array($data['bookable_type'], ['residence', Residence::class]) ? Residence::class : Activity::class;
             $bookable = $bookableClass::findOrFail($data['bookable_id']);
 
             // Check availability
@@ -31,12 +31,16 @@ class BookingService
                 throw new \Exception('Tidak ada slot tersedia');
             }
 
-            // Handle document uploads
+            // Handle document uploads (store structured info)
             $documents = [];
             if (isset($data['documents'])) {
-                foreach ($data['documents'] as $document) {
-                    $path = $document->store('documents', 'public');
-                    $documents[] = $path;
+                foreach ($data['documents'] as $uploadedFile) {
+                    $path = $uploadedFile->store('documents', 'public');
+                    $documents[] = [
+                        'name' => $uploadedFile->getClientOriginalName(),
+                        'type' => $uploadedFile->getClientMimeType(),
+                        'path' => $path,
+                    ];
                 }
             }
 
@@ -52,7 +56,7 @@ class BookingService
                 'booking_code' => $this->generateBookingCode(),
                 'check_in_date' => $checkInDate,
                 'check_out_date' => $checkOutDate,
-                'documents' => json_encode($documents),
+                'documents' => $documents,
                 'status' => 'pending',
                 'notes' => $data['notes'] ?? null
             ]);

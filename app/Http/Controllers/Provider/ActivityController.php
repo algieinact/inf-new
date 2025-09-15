@@ -71,7 +71,7 @@ class ActivityController extends Controller
                     $path = $image->store('activities', 'public');
                     $images[] = $path;
                 }
-                $data['images'] = json_encode($images);
+                $data['images'] = $images; // rely on $casts to store as JSON
             }
 
             // Set available_slots to capacity initially
@@ -108,7 +108,7 @@ class ActivityController extends Controller
             // Handle image uploads
             if ($request->hasFile('images')) {
                 // Delete old images
-                $oldImages = json_decode($activity->images, true) ?? [];
+                $oldImages = $activity->images ?? [];
                 foreach ($oldImages as $oldImage) {
                     Storage::disk('public')->delete($oldImage);
                 }
@@ -118,7 +118,7 @@ class ActivityController extends Controller
                     $path = $image->store('activities', 'public');
                     $images[] = $path;
                 }
-                $data['images'] = json_encode($images);
+                $data['images'] = $images; // rely on $casts to store as JSON
             }
 
             $activity->update($data);
@@ -149,7 +149,7 @@ class ActivityController extends Controller
             }
 
             // Delete images
-            $images = json_decode($activity->images, true) ?? [];
+            $images = $activity->images ?? [];
             foreach ($images as $image) {
                 Storage::disk('public')->delete($image);
             }

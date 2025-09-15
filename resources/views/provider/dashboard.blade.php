@@ -223,10 +223,16 @@
                         <div class="text-center py-8">
                             <i class="fas fa-plus text-gray-400 text-4xl mb-4"></i>
                             <p class="text-gray-600">Belum ada item</p>
-                            <a href="{{ route('provider.residences.create') }}"
-                               class="text-blue-600 hover:text-blue-700 text-sm font-medium mt-2 inline-block">
-                                Buat residence pertama
-                            </a>
+                            <div class="mt-2 space-x-3">
+                                <a href="{{ route('provider.residences.create') }}"
+                                   class="text-blue-600 hover:text-blue-700 text-sm font-medium inline-block">
+                                    Buat residence pertama
+                                </a>
+                                <a href="{{ route('provider.activities.create') }}"
+                                   class="text-green-600 hover:text-green-700 text-sm font-medium inline-block">
+                                    Buat kegiatan pertama
+                                </a>
+                            </div>
                         </div>
                     @endif
                 </div>

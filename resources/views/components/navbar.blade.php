@@ -83,7 +83,7 @@
                             @endif
 
                             <div class="border-t border-gray-100"></div>
-                            <a href=""
+                            <a href="{{ route('user.profile.show') }}"
                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 <i class="fas fa-user mr-2"></i>Profil
                             </a>
@@ -167,7 +167,7 @@
                             <i class="fas fa-heart mr-2"></i>Bookmark
                         </a>
                     @endif
-                    <a href=""
+                    <a href="{{ route('user.profile.show') }}"
                        class="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-user mr-2"></i>Profil
                     </a>

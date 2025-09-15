@@ -56,6 +56,9 @@ class ResidenceController extends Controller
             $data = $request->validated();
             $data['provider_id'] = auth()->id();
 
+            // Ensure price is set from price_per_month (validated key)
+            $data['price'] = $request->input('price', $request->input('price_per_month'));
+
             // Handle image uploads
             if ($request->hasFile('images')) {
                 $images = [];
@@ -63,12 +66,12 @@ class ResidenceController extends Controller
                     $path = $image->store('residences', 'public');
                     $images[] = $path;
                 }
-                $data['images'] = json_encode($images);
+                $data['images'] = $images; // rely on $casts to store as JSON
             }
 
             // Handle facilities
             if (isset($data['facilities'])) {
-                $data['facilities'] = json_encode($data['facilities']);
+                $data['facilities'] = array_values($data['facilities']);
             }
 
             // Set available_slots to capacity initially
@@ -102,10 +105,13 @@ class ResidenceController extends Controller
         try {
             $data = $request->validated();
 
+            // Ensure price is set from price_per_month (validated key)
+            $data['price'] = $request->input('price', $request->input('price_per_month'));
+
             // Handle image uploads
             if ($request->hasFile('images')) {
                 // Delete old images
-                $oldImages = json_decode($residence->images, true) ?? [];
+                $oldImages = $residence->images ?? [];
                 foreach ($oldImages as $oldImage) {
                     Storage::disk('public')->delete($oldImage);
                 }
@@ -115,12 +121,12 @@ class ResidenceController extends Controller
                     $path = $image->store('residences', 'public');
                     $images[] = $path;
                 }
-                $data['images'] = json_encode($images);
+                $data['images'] = $images; // rely on $casts to store as JSON
             }
 
             // Handle facilities
             if (isset($data['facilities'])) {
-                $data['facilities'] = json_encode($data['facilities']);
+                $data['facilities'] = array_values($data['facilities']);
             }
 
             $residence->update($data);

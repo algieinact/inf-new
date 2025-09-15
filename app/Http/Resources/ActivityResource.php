@@ -18,7 +18,7 @@ class ActivityResource extends JsonResource
             'price' => $this->price,
             'capacity' => $this->capacity,
             'available_slots' => $this->available_slots,
-            'images' => json_decode($this->images, true),
+            'images' => $this->images,
             'discount_type' => $this->discount_type,
             'discount_value' => $this->discount_value,
             'discounted_price' => $this->getDiscountedPrice(),

@@ -15,6 +15,7 @@ use App\Http\Controllers\Provider\ActivityController as ProviderActivityControll
 use App\Http\Controllers\Provider\BookingManagementController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\User\ProfileController;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -38,6 +39,9 @@ Route::get('/activities/{activity}', [UserActivityController::class, 'show'])->n
 
 // Authentication required routes
 Route::middleware('auth')->group(function () {
+
+    // Profile (available to any authenticated user)
+    Route::get('/profile', [ProfileController::class, 'show'])->name('user.profile.show');
 
     // User specific routes
     Route::middleware('role:user')->prefix('user')->name('user.')->group(function () {

@@ -16,7 +16,7 @@ class StoreBookingRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'bookable_type' => 'required|in:residence,activity',
+            'bookable_type' => 'required|in:residence,activity,App\\Models\\Residence,App\\Models\\Activity',
             'bookable_id' => 'required|integer',
             'check_in_date' => 'required|date|after_or_equal:today',
             'documents' => 'required|array|min:1',
@@ -60,6 +60,16 @@ class StoreBookingRequest extends FormRequest
             $this->validateBookableItem($validator);
             $this->validateAvailability($validator);
         });
+    }
+
+    protected function prepareForValidation()
+    {
+        $type = $this->input('bookable_type');
+        if ($type === 'App\\Models\\Residence') {
+            $this->merge(['bookable_type' => 'residence']);
+        } elseif ($type === 'App\\Models\\Activity') {
+            $this->merge(['bookable_type' => 'activity']);
+        }
     }
 
     protected function validateBookableItem($validator)

@@ -32,6 +32,28 @@ class Residence extends Model
         'is_active' => 'boolean',
     ];
 
+    public function getPricePerMonthAttribute()
+    {
+        return $this->attributes['price'] ?? null;
+    }
+
+    public function getDiscountedPrice(): float
+    {
+        $basePrice = (float) ($this->price ?? 0);
+
+        if (!$this->discount_type || $this->discount_value === null) {
+            return $basePrice;
+        }
+
+        if ($this->discount_type === 'percentage') {
+            $discount = $basePrice * ((float) $this->discount_value) / 100.0;
+            return max(0.0, $basePrice - $discount);
+        }
+
+        // flat
+        return max(0.0, $basePrice - (float) $this->discount_value);
+    }
+
     public function provider() {
         return $this->belongsTo(User::class, 'provider_id');
     }

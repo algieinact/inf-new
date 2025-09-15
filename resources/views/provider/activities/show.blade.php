@@ -159,7 +159,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Pendapatan</span>
-                            <span class="font-medium">Rp {{ number_format($activity->bookings()->where('status', 'approved')->sum('transaction.final_amount')) }}</span>
+                            <span class="font-medium">Rp {{ number_format($activity->approvedRevenue()) }}</span>
                         </div>
                         @if($activity->ratings_avg_rating)
                             <div class="flex justify-between">
