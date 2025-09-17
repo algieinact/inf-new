@@ -22,18 +22,44 @@ class BookingManagementController extends Controller
     public function index(Request $request)
     {
         $status = $request->get('status', 'all');
+        $search = $request->get('search');
+        $type = $request->get('type');
 
         $query = Booking::whereHas('bookable', function ($q) {
             $q->where('provider_id', auth()->id());
         })->with(['user', 'bookable', 'transaction']);
 
+        // Status filter
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
+        // Type filter (residence or activity)
+        if ($type) {
+            if ($type === 'residence') {
+                $query->where('bookable_type', 'App\\Models\\Residence');
+            } elseif ($type === 'activity') {
+                $query->where('bookable_type', 'App\\Models\\Activity');
+            }
+        }
+
+        // Search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('booking_code', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('bookable', function ($bookableQuery) use ($search) {
+                      $bookableQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
         $bookings = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        return view('provider.bookings.index', compact('bookings', 'status'));
+        return view('provider.bookings.index', compact('bookings', 'status', 'search', 'type'));
     }
 
     public function show(Booking $booking)
@@ -94,4 +120,6 @@ class BookingManagementController extends Controller
         }
     }
 }
+
+
 

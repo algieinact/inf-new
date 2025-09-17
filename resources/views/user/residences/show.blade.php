@@ -99,6 +99,45 @@
                 </div>
                 @endif
 
+                <!-- Rating Form -->
+                @auth
+                @if($canRate)
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Tulis Ulasan</h3>
+                    <form id="ratingForm" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="type" value="residence">
+                        <input type="hidden" name="id" value="{{ $residence->id }}">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                            <div class="flex space-x-2">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="rating" value="{{ $i }}" class="hidden" {{ isset($userRating) && $userRating && $userRating->rating == $i ? 'checked' : '' }}>
+                                        <i class="fas fa-star text-2xl {{ isset($userRating) && $userRating && $userRating->rating >= $i ? 'text-yellow-400' : 'text-gray-300' }}"
+                                           onclick="this.previousElementSibling.checked = true; highlightStars(this, {{ $i }})"></i>
+                                    </label>
+                                @endfor
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ulasan (opsional)</label>
+                            <textarea name="review" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ $userRating->review ?? '' }}</textarea>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <button type="button" onclick="submitRating()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">Simpan Ulasan</button>
+                            @if(isset($userRating) && $userRating)
+                                <button type="button" onclick="deleteRating({{ $residence->id }}, 'residence')" class="text-red-600 hover:text-red-700 font-medium">Hapus Ulasan</button>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+                @endif
+                @endauth
+
                 <!-- Reviews -->
                 @if($residence->ratings && $residence->ratings->count() > 0)
                 <div class="bg-white rounded-lg shadow-sm p-6">
@@ -122,8 +161,8 @@
                                 </div>
                                 <span class="text-sm text-gray-500">{{ $rating->created_at->format('d M Y') }}</span>
                             </div>
-                            @if($rating->comment)
-                                <p class="text-gray-700">{{ $rating->comment }}</p>
+                            @if($rating->review)
+                                <p class="text-gray-700">{{ $rating->review }}</p>
                             @endif
                         </div>
                         @endforeach
@@ -215,22 +254,43 @@
 @push('scripts')
 <script>
 function toggleBookmark(id, type) {
-    fetch('{{ route("user.bookmarks.store") }}', {
-        method: 'POST',
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    const isBookmarked = button.classList.contains('bg-red-100');
+
+    const url = isBookmarked ? '{{ route("user.bookmarks.destroy") }}' : '{{ route("user.bookmarks.store") }}';
+    const method = isBookmarked ? 'DELETE' : 'POST';
+
+    fetch(url, {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify({
-            bookmarkable_id: id,
-            bookmarkable_type: 'App\\Models\\' + type.charAt(0).toUpperCase() + type.slice(1)
+            type: type,
+            id: id
         })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            location.reload();
+        if (data.message) {
+            if (isBookmarked) {
+                // Remove bookmark
+                button.classList.remove('bg-red-100', 'text-red-600');
+                button.classList.add('bg-gray-100', 'text-gray-600');
+            } else {
+                // Add bookmark
+                button.classList.remove('bg-gray-100', 'text-gray-600');
+                button.classList.add('bg-red-100', 'text-red-600');
+            }
+        } else {
+            alert('Gagal mengubah bookmark. Silakan coba lagi.');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
     });
 }
 
@@ -239,6 +299,137 @@ function changeMainImage(src, element) {
     document.querySelectorAll('.border-blue-500').forEach(el => el.classList.remove('border-blue-500', 'border-white'));
     element.classList.add('border-blue-500');
     element.classList.remove('border-white');
+}
+
+function highlightStars(el, rating) {
+    const stars = el.parentElement.parentElement.querySelectorAll('i');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('text-gray-300');
+            star.classList.add('text-yellow-400');
+        } else {
+            star.classList.remove('text-yellow-400');
+            star.classList.add('text-gray-300');
+        }
+    });
+}
+
+function submitRating() {
+    const form = document.getElementById('ratingForm');
+    const formData = new FormData(form);
+
+    // Show loading state
+    const submitBtn = form.querySelector('button[onclick="submitRating()"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Menyimpan...';
+    submitBtn.disabled = true;
+
+    fetch('{{ route("user.ratings.store") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' && data.message) {
+            // Show success message
+            showNotification(data.message, 'success');
+
+            // Update the form to show the rating was saved
+            const rating = formData.get('rating');
+            const review = formData.get('review');
+
+            // Update star display
+            highlightStars(document.querySelector(`input[name="rating"][value="${rating}"]`).nextElementSibling, rating);
+
+            // Update delete button visibility
+            const deleteBtn = form.querySelector('button[onclick*="deleteRating"]');
+            if (deleteBtn) {
+                deleteBtn.style.display = 'inline-block';
+            } else {
+                // Add delete button if it doesn't exist
+                const buttonContainer = form.querySelector('.flex.items-center.space-x-3');
+                const newDeleteBtn = document.createElement('button');
+                newDeleteBtn.type = 'button';
+                newDeleteBtn.onclick = () => deleteRating({{ $residence->id }}, 'residence');
+                newDeleteBtn.className = 'text-red-600 hover:text-red-700 font-medium';
+                newDeleteBtn.textContent = 'Hapus Ulasan';
+                buttonContainer.appendChild(newDeleteBtn);
+            }
+        } else {
+            const errorMessage = data.message || 'Gagal menyimpan ulasan';
+            showNotification(errorMessage, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Terjadi kesalahan saat menyimpan ulasan', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function deleteRating(id, type) {
+    if (!confirm('Apakah Anda yakin ingin menghapus ulasan ini?')) {
+        return;
+    }
+
+    fetch('{{ route("user.ratings.destroy") }}', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ type, id })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success' && data.message) {
+            showNotification(data.message, 'success');
+
+            // Reset form
+            const form = document.getElementById('ratingForm');
+            form.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
+            form.querySelector('textarea[name="review"]').value = '';
+
+            // Reset stars
+            form.querySelectorAll('.fas.fa-star').forEach(star => {
+                star.classList.remove('text-yellow-400');
+                star.classList.add('text-gray-300');
+            });
+
+            // Hide delete button
+            const deleteBtn = form.querySelector('button[onclick*="deleteRating"]');
+            if (deleteBtn) {
+                deleteBtn.style.display = 'none';
+            }
+        } else {
+            const errorMessage = data.message || 'Gagal menghapus ulasan';
+            showNotification(errorMessage, 'error');
+        }
+    })
+    .catch(() => showNotification('Terjadi kesalahan saat menghapus ulasan', 'error'));
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
 </script>
 @endpush

@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/bookmarks', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
 
         // Ratings
+        Route::get('/ratings', [RatingController::class, 'show'])->name('ratings.show');
         Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
         Route::delete('/ratings', [RatingController::class, 'destroy'])->name('ratings.destroy');
     });

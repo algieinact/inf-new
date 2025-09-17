@@ -35,7 +35,10 @@
         @if($bookmarks->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($bookmarks as $bookmark)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
+                     data-bookmark-id="{{ $bookmark->id }}"
+                     data-type="{{ $bookmark->bookmarkable_type === 'App\\Models\\Residence' ? 'residence' : 'activity' }}"
+                     data-id="{{ $bookmark->bookmarkable_id }}">
                     <div class="h-48 bg-gray-200 relative">
                         @if($bookmark->bookmarkable->images && count($bookmark->bookmarkable->images) > 0)
                             <img src="{{ asset('storage/' . $bookmark->bookmarkable->images[0]) }}"
@@ -215,6 +218,11 @@
 <script>
 function removeBookmark(bookmarkId) {
     if (confirm('Apakah Anda yakin ingin menghapus item ini dari bookmark?')) {
+        // Get the bookmark data from the DOM
+        const bookmarkElement = document.querySelector(`[data-bookmark-id="${bookmarkId}"]`);
+        const type = bookmarkElement.dataset.type;
+        const id = bookmarkElement.dataset.id;
+
         fetch('{{ route("user.bookmarks.destroy") }}', {
             method: 'DELETE',
             headers: {
@@ -222,12 +230,13 @@ function removeBookmark(bookmarkId) {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({
-                bookmark_id: bookmarkId
+                type: type,
+                id: id
             })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.message) {
                 location.reload();
             } else {
                 alert('Gagal menghapus bookmark. Silakan coba lagi.');

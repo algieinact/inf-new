@@ -18,7 +18,6 @@ class StoreBookingRequest extends FormRequest
         $rules = [
             'bookable_type' => 'required|in:residence,activity,App\\Models\\Residence,App\\Models\\Activity',
             'bookable_id' => 'required|integer',
-            'check_in_date' => 'required|date|after_or_equal:today',
             'documents' => 'required|array|min:1',
             'documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
             'notes' => 'nullable|string|max:1000'
@@ -26,7 +25,11 @@ class StoreBookingRequest extends FormRequest
 
         // Add conditional rules based on bookable type
         if ($this->bookable_type === 'residence') {
+            $rules['check_in_date'] = 'required|date|after_or_equal:today';
             $rules['check_out_date'] = 'nullable|date|after:check_in_date';
+        } else {
+            // For activity, check_in_date is required but validation is handled in validateBookableItem
+            $rules['check_in_date'] = 'required|date';
         }
 
         return $rules;
@@ -96,6 +99,12 @@ class StoreBookingRequest extends FormRequest
         if ($type === 'activity') {
             if ($item->registration_deadline <= now()) {
                 $validator->errors()->add('bookable_id', 'Registrasi sudah ditutup');
+            }
+
+            // Validate that check_in_date matches event_date
+            $checkInDate = $this->input('check_in_date');
+            if ($checkInDate && $item->event_date->format('Y-m-d') !== $checkInDate) {
+                $validator->errors()->add('check_in_date', 'Tanggal booking harus sesuai dengan tanggal kegiatan');
             }
         }
     }

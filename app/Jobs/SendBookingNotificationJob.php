@@ -29,3 +29,4 @@ class SendBookingNotificationJob implements ShouldQueue
     }
 }
 
+

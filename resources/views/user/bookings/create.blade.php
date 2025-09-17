@@ -96,6 +96,7 @@
                                 </div>
                             @else
                                 <div class="md:col-span-2">
+                                    <input type="hidden" name="check_in_date" value="{{ $bookable->event_date->format('Y-m-d') }}">
                                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                         <div class="flex">
                                             <i class="fas fa-info-circle text-blue-400 mr-3 mt-0.5"></i>

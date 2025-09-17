@@ -13,7 +13,8 @@ class ResidenceController extends Controller
     {
         $query = Residence::with(['provider', 'category'])
             ->where('is_active', true)
-            ->withAvg('ratings', 'rating');
+            ->withAvg('ratings', 'rating')
+            ->withCount('ratings');
 
         // Filters
         if ($request->filled('category_id')) {
@@ -82,17 +83,22 @@ class ResidenceController extends Controller
                 ->first();
         }
 
-        // Check if user can rate (has completed booking)
+        // Check if user can rate (has approved booking and paid transaction)
         $canRate = false;
         if (auth()->check()) {
             $canRate = auth()->user()->bookings()
                 ->where('bookable_type', Residence::class)
                 ->where('bookable_id', $residence->id)
-                ->where('status', 'completed')
+                ->where('status', 'approved')
+                ->whereHas('transaction', function ($q) {
+                    $q->where('payment_status', 'paid');
+                })
                 ->exists();
         }
 
         return view('user.residences.show', compact('residence', 'isBookmarked', 'userRating', 'canRate'));
     }
 }
+
+
 

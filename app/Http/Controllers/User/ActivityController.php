@@ -14,7 +14,8 @@ class ActivityController extends Controller
         $query = Activity::with(['provider', 'category'])
             ->where('is_active', true)
             ->where('registration_deadline', '>', now())
-            ->withAvg('ratings', 'rating');
+            ->withAvg('ratings', 'rating')
+            ->withCount('ratings');
 
         // Filters
         if ($request->filled('category_id')) {
@@ -93,17 +94,22 @@ class ActivityController extends Controller
                 ->first();
         }
 
-        // Check if user can rate (has completed booking)
+        // Check if user can rate (has approved booking and paid transaction)
         $canRate = false;
         if (auth()->check()) {
             $canRate = auth()->user()->bookings()
                 ->where('bookable_type', Activity::class)
                 ->where('bookable_id', $activity->id)
-                ->where('status', 'completed')
+                ->where('status', 'approved')
+                ->whereHas('transaction', function ($q) {
+                    $q->where('payment_status', 'paid');
+                })
                 ->exists();
         }
 
         return view('user.activities.show', compact('activity', 'isBookmarked', 'userRating', 'canRate', 'isRegistrationOpen'));
     }
 }
+
+
 

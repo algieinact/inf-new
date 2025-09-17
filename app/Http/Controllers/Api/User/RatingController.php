@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Rating;
@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 
 class RatingController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -20,14 +25,14 @@ class RatingController extends Controller
         ]);
 
         $type = $request->type;
-        $id = $request->id;
+        $id   = $request->id;
 
         $modelClass = $type === 'residence' ? Residence::class : Activity::class;
 
         // Check if item exists
         $item = $modelClass::findOrFail($id);
 
-        // Check if user has approved booking and paid transaction for this item
+        // Check eligibility: must have approved booking and paid transaction
         $eligibleToRate = auth()->user()->bookings()
             ->where('bookable_type', $modelClass)
             ->where('bookable_id', $id)
@@ -40,7 +45,7 @@ class RatingController extends Controller
         if (!$eligibleToRate) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Anda hanya dapat memberikan rating setelah booking disetujui dan dibayar'
+                'message' => 'You can only rate items with approved booking and paid transaction'
             ], 403);
         }
 
@@ -59,7 +64,7 @@ class RatingController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Rating berhasil diupdate',
+                'message' => 'Rating updated successfully',
                 'data' => [
                     'rating' => [
                         'id' => $existingRating->id,
@@ -83,7 +88,7 @@ class RatingController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Rating berhasil diberikan',
+            'message' => 'Rating submitted successfully',
             'data' => [
                 'rating' => [
                     'id' => $rating->id,
@@ -96,6 +101,40 @@ class RatingController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, Rating $rating)
+    {
+        if ($rating->user_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized access to this rating'
+            ], 403);
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review' => 'nullable|string|max:1000'
+        ]);
+
+        $rating->update([
+            'rating' => $request->rating,
+            'review' => $request->review
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Rating updated successfully',
+            'data' => [
+                'rating' => [
+                    'id' => $rating->id,
+                    'rating' => $rating->rating,
+                    'review' => $rating->review,
+                    'created_at' => $rating->created_at,
+                    'updated_at' => $rating->updated_at,
+                ]
+            ]
+        ], 200);
+    }
+
     public function destroy(Request $request)
     {
         $request->validate([
@@ -104,7 +143,7 @@ class RatingController extends Controller
         ]);
 
         $type = $request->type;
-        $id = $request->id;
+        $id   = $request->id;
 
         $modelClass = $type === 'residence' ? Residence::class : Activity::class;
 
@@ -116,7 +155,7 @@ class RatingController extends Controller
         if (!$rating) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Rating tidak ditemukan'
+                'message' => 'Rating not found'
             ], 404);
         }
 
@@ -124,7 +163,7 @@ class RatingController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Rating berhasil dihapus'
+            'message' => 'Rating deleted successfully'
         ], 200);
     }
 
@@ -136,7 +175,7 @@ class RatingController extends Controller
         ]);
 
         $type = $request->type;
-        $id = $request->id;
+        $id   = $request->id;
 
         $modelClass = $type === 'residence' ? Residence::class : Activity::class;
 
@@ -148,7 +187,7 @@ class RatingController extends Controller
         if (!$rating) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Rating tidak ditemukan'
+                'message' => 'Rating not found'
             ], 404);
         }
 
@@ -166,6 +205,3 @@ class RatingController extends Controller
         ], 200);
     }
 }
-
-
-

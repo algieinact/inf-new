@@ -64,10 +64,24 @@
                                             <i class="fas fa-home text-4xl text-gray-400"></i>
                                         </div>
                                     @endif
-                                    <div class="absolute top-4 right-4">
+                                    <div class="absolute top-4 right-4 flex flex-col gap-2">
                                         <span class="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium">
                                             {{ $residence->available_slots }} tersedia
                                         </span>
+                                        @auth
+                                            @if(auth()->user()->hasRole('user'))
+                                                @php
+                                                    $isBookmarked = auth()->user()->bookmarks()
+                                                        ->where('bookmarkable_type', 'App\\Models\\Residence')
+                                                        ->where('bookmarkable_id', $residence->id)
+                                                        ->exists();
+                                                @endphp
+                                                <button onclick="toggleBookmark('residence', {{ $residence->id }}, this)"
+                                                        class="bg-white hover:bg-gray-100 text-gray-700 p-2 rounded-full shadow-md transition-colors {{ $isBookmarked ? 'text-red-500' : 'text-gray-400' }}">
+                                                    <i class="fas fa-heart {{ $isBookmarked ? 'fas' : 'far' }}"></i>
+                                                </button>
+                                            @endif
+                                        @endauth
                                     </div>
                                 </div>
                             </div>
@@ -146,10 +160,24 @@
                                             <i class="fas fa-calendar-alt text-4xl text-gray-400"></i>
                                         </div>
                                     @endif
-                                    <div class="absolute top-4 right-4">
+                                    <div class="absolute top-4 right-4 flex flex-col gap-2">
                                         <span class="bg-green-600 text-white px-2 py-1 rounded-full text-xs font-medium">
                                             {{ $activity->available_slots }} slot tersisa
                                         </span>
+                                        @auth
+                                            @if(auth()->user()->hasRole('user'))
+                                                @php
+                                                    $isBookmarked = auth()->user()->bookmarks()
+                                                        ->where('bookmarkable_type', 'App\\Models\\Activity')
+                                                        ->where('bookmarkable_id', $activity->id)
+                                                        ->exists();
+                                                @endphp
+                                                <button onclick="toggleBookmark('activity', {{ $activity->id }}, this)"
+                                                        class="bg-white hover:bg-gray-100 text-gray-700 p-2 rounded-full shadow-md transition-colors {{ $isBookmarked ? 'text-red-500' : 'text-gray-400' }}">
+                                                    <i class="fas fa-heart {{ $isBookmarked ? 'fas' : 'far' }}"></i>
+                                                </button>
+                                            @endif
+                                        @endauth
                                     </div>
                                 </div>
                             </div>
@@ -229,4 +257,52 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function toggleBookmark(type, id, button) {
+    const icon = button.querySelector('i');
+    const isBookmarked = icon.classList.contains('fas');
+
+    const url = isBookmarked ? '{{ route("user.bookmarks.destroy") }}' : '{{ route("user.bookmarks.store") }}';
+    const method = isBookmarked ? 'DELETE' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            type: type,
+            id: id
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            if (isBookmarked) {
+                // Remove bookmark
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                button.classList.remove('text-red-500');
+                button.classList.add('text-gray-400');
+            } else {
+                // Add bookmark
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                button.classList.remove('text-gray-400');
+                button.classList.add('text-red-500');
+            }
+        } else {
+            alert('Gagal mengubah bookmark. Silakan coba lagi.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+    });
+}
+</script>
+@endpush
 @endsection

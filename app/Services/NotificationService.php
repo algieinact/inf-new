@@ -33,10 +33,10 @@ class NotificationService
     {
         // Notify provider
         $booking->bookable->provider->notify(new BookingNotification(
-            title: 'Booking Baru',
-            message: "Anda menerima booking baru untuk {$booking->bookable->name} dari {$booking->user->name}",
-            category: 'booking_status',
-            booking: $booking
+            'Booking Baru',
+            "Anda menerima booking baru untuk {$booking->bookable->name} dari {$booking->user->name}",
+            'booking_status',
+            $booking
         ));
 
         // Send email if enabled
@@ -47,10 +47,10 @@ class NotificationService
     {
         // Notify user
         $booking->user->notify(new BookingNotification(
-            title: 'Booking Disetujui',
-            message: "Booking Anda untuk {$booking->bookable->name} telah disetujui. Silakan lakukan pembayaran.",
-            category: 'booking_status',
-            booking: $booking
+            'Booking Disetujui',
+            "Booking Anda untuk {$booking->bookable->name} telah disetujui. Silakan lakukan pembayaran.",
+            'booking_status',
+            $booking
         ));
     }
 
@@ -58,10 +58,10 @@ class NotificationService
     {
         // Notify user
         $booking->user->notify(new BookingNotification(
-            title: 'Booking Ditolak',
-            message: "Booking Anda untuk {$booking->bookable->name} ditolak. Alasan: {$booking->rejection_reason}",
-            category: 'booking_status',
-            booking: $booking
+            'Booking Ditolak',
+            "Booking Anda untuk {$booking->bookable->name} ditolak. Alasan: {$booking->rejection_reason}",
+            'booking_status',
+            $booking
         ));
     }
 
@@ -69,10 +69,10 @@ class NotificationService
     {
         // Notify provider
         $booking->bookable->provider->notify(new BookingNotification(
-            title: 'Booking Dibatalkan',
-            message: "Booking untuk {$booking->bookable->name} dari {$booking->user->name} telah dibatalkan",
-            category: 'booking_status',
-            booking: $booking
+            'Booking Dibatalkan',
+            "Booking untuk {$booking->bookable->name} dari {$booking->user->name} telah dibatalkan",
+            'booking_status',
+            $booking
         ));
     }
 
@@ -80,18 +80,18 @@ class NotificationService
     {
         // Notify provider
         $booking->bookable->provider->notify(new BookingNotification(
-            title: 'Pembayaran Diterima',
-            message: "Pembayaran untuk booking {$booking->booking_code} telah diterima",
-            category: 'payment_status',
-            booking: $booking
+            'Pembayaran Diterima',
+            "Pembayaran untuk booking {$booking->booking_code} telah diterima",
+            'payment_status',
+            $booking
         ));
 
         // Notify user
         $booking->user->notify(new BookingNotification(
-            title: 'Pembayaran Berhasil',
-            message: "Pembayaran Anda untuk {$booking->bookable->name} telah berhasil diproses",
-            category: 'payment_status',
-            booking: $booking
+            'Pembayaran Berhasil',
+            "Pembayaran Anda untuk {$booking->bookable->name} telah berhasil diproses",
+            'payment_status',
+            $booking
         ));
     }
 

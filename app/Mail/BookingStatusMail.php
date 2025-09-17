@@ -47,3 +47,4 @@ class BookingStatusMail extends Mailable
     }
 }
 
+

@@ -187,6 +187,7 @@ class BookingService
             'original_amount' => $originalAmount,
             'discount_amount' => $discountAmount,
             'final_amount' => $finalAmount,
+            'payment_method' => 'pending', // Will be updated when user makes payment
             'payment_status' => 'pending'
         ]);
     }
