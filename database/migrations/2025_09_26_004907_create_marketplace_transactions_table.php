@@ -20,7 +20,6 @@ return new class extends Migration
             $table->integer('quantity')->default(1);
             $table->decimal('unit_price', 12, 2);
             $table->decimal('total_amount', 12, 2);
-            $table->decimal('negotiated_price', 12, 2)->nullable();
             $table->string('buyer_name');
             $table->string('buyer_phone', 20);
             $table->text('buyer_address');

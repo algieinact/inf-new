@@ -80,4 +80,25 @@ class User extends Authenticatable
     {
         return $this->hasMany(Activity::class, 'provider_id');
     }
+
+    // MARKETPLACE RELATIONSHIPS
+    public function marketplaceProducts()
+    {
+        return $this->hasMany(MarketplaceProduct::class, 'seller_id');
+    }
+
+    public function marketplaceTransactionsAsBuyer()
+    {
+        return $this->hasMany(MarketplaceTransaction::class, 'buyer_id');
+    }
+
+    public function marketplaceTransactionsAsSeller()
+    {
+        return $this->hasMany(MarketplaceTransaction::class, 'seller_id');
+    }
+
+    public function marketplaceTransactions()
+    {
+        return $this->hasMany(MarketplaceTransaction::class, 'buyer_id');
+    }
 }

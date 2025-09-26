@@ -6,16 +6,32 @@ use App\Http\Controllers\Controller;
 use App\Models\Bookmark;
 use App\Models\Residence;
 use App\Models\Activity;
+use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bookmarks = auth()->user()->bookmarks()
-            ->with('bookmarkable')
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+        $query = Auth::user()->bookmarks()->with('bookmarkable');
+
+        // Filter by type
+        if ($request->type && $request->type !== 'all') {
+            switch ($request->type) {
+                case 'residence':
+                    $query->where('bookmarkable_type', 'App\\Models\\Residence');
+                    break;
+                case 'activity':
+                    $query->where('bookmarkable_type', 'App\\Models\\Activity');
+                    break;
+                case 'marketplace':
+                    $query->where('bookmarkable_type', 'App\\Models\\MarketplaceProduct');
+                    break;
+            }
+        }
+
+        $bookmarks = $query->orderBy('created_at', 'desc')->paginate(12);
 
         return view('user.bookmarks.index', compact('bookmarks'));
     }
@@ -23,7 +39,7 @@ class BookmarkController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:residence,activity',
+            'type' => 'required|in:residence,activity,marketplace',
             'id' => 'required|integer'
         ]);
 
@@ -31,13 +47,25 @@ class BookmarkController extends Controller
         $id = $request->id;
 
         // Determine the model class
-        $modelClass = $type === 'residence' ? Residence::class : Activity::class;
+        switch ($type) {
+            case 'residence':
+                $modelClass = Residence::class;
+                break;
+            case 'activity':
+                $modelClass = Activity::class;
+                break;
+            case 'marketplace':
+                $modelClass = \App\Models\MarketplaceProduct::class;
+                break;
+            default:
+                return response()->json(['message' => 'Tipe tidak valid'], 400);
+        }
 
         // Check if item exists
         $item = $modelClass::findOrFail($id);
 
         // Check if already bookmarked
-        $existingBookmark = auth()->user()->bookmarks()
+        $existingBookmark = Auth::user()->bookmarks()
             ->where('bookmarkable_type', $modelClass)
             ->where('bookmarkable_id', $id)
             ->first();
@@ -47,7 +75,7 @@ class BookmarkController extends Controller
         }
 
         // Create bookmark
-        auth()->user()->bookmarks()->create([
+        Auth::user()->bookmarks()->create([
             'bookmarkable_type' => $modelClass,
             'bookmarkable_id' => $id
         ]);
@@ -58,16 +86,28 @@ class BookmarkController extends Controller
     public function destroy(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:residence,activity',
+            'type' => 'required|in:residence,activity,marketplace',
             'id' => 'required|integer'
         ]);
 
         $type = $request->type;
         $id = $request->id;
 
-        $modelClass = $type === 'residence' ? Residence::class : Activity::class;
+        switch ($type) {
+            case 'residence':
+                $modelClass = Residence::class;
+                break;
+            case 'activity':
+                $modelClass = Activity::class;
+                break;
+            case 'marketplace':
+                $modelClass = \App\Models\MarketplaceProduct::class;
+                break;
+            default:
+                return response()->json(['message' => 'Tipe tidak valid'], 400);
+        }
 
-        $bookmark = auth()->user()->bookmarks()
+        $bookmark = Auth::user()->bookmarks()
             ->where('bookmarkable_type', $modelClass)
             ->where('bookmarkable_id', $id)
             ->first();

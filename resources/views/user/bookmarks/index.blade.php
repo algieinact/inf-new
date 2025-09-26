@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@php
+use App\Models\Bookmark;
+use Illuminate\Support\Facades\Auth;
+@endphp
+
 @section('title', 'Bookmark - Infoma')
 
 @section('content')
@@ -17,15 +22,19 @@
                 <nav class="-mb-px flex space-x-8 px-6">
                     <a href="{{ route('user.bookmarks.index', ['type' => 'all']) }}"
                        class="py-4 px-1 border-b-2 font-medium text-sm {{ request('type') === 'all' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                        Semua ({{ $bookmarks->where('bookmarkable_type', 'App\\Models\\Residence')->count() + $bookmarks->where('bookmarkable_type', 'App\\Models\\Activity')->count() }})
+                        Semua ({{ Bookmark::where('user_id', Auth::id())->whereIn('bookmarkable_type', ['App\\Models\\Residence', 'App\\Models\\Activity', 'App\\Models\\MarketplaceProduct'])->count() }})
                     </a>
                     <a href="{{ route('user.bookmarks.index', ['type' => 'residence']) }}"
                        class="py-4 px-1 border-b-2 font-medium text-sm {{ request('type') === 'residence' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                        Residence ({{ $bookmarks->where('bookmarkable_type', 'App\\Models\\Residence')->count() }})
+                        Residence ({{ Bookmark::where('user_id', Auth::id())->where('bookmarkable_type', 'App\\Models\\Residence')->count() }})
                     </a>
                     <a href="{{ route('user.bookmarks.index', ['type' => 'activity']) }}"
                        class="py-4 px-1 border-b-2 font-medium text-sm {{ request('type') === 'activity' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                        Kegiatan ({{ $bookmarks->where('bookmarkable_type', 'App\\Models\\Activity')->count() }})
+                        Kegiatan ({{ Bookmark::where('user_id', Auth::id())->where('bookmarkable_type', 'App\\Models\\Activity')->count() }})
+                    </a>
+                    <a href="{{ route('user.bookmarks.index', ['type' => 'marketplace']) }}"
+                       class="py-4 px-1 border-b-2 font-medium text-sm {{ request('type') === 'marketplace' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        Marketplace ({{ Bookmark::where('user_id', Auth::id())->where('bookmarkable_type', 'App\\Models\\MarketplaceProduct')->count() }})
                     </a>
                 </nav>
             </div>
@@ -37,16 +46,16 @@
                 @foreach($bookmarks as $bookmark)
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
                      data-bookmark-id="{{ $bookmark->id }}"
-                     data-type="{{ $bookmark->bookmarkable_type === 'App\\Models\\Residence' ? 'residence' : 'activity' }}"
+                     data-type="{{ $bookmark->bookmarkable_type === 'App\\Models\\MarketplaceProduct' ? 'marketplace' : ($bookmark->bookmarkable_type === 'App\\Models\\Residence' ? 'residence' : 'activity') }}"
                      data-id="{{ $bookmark->bookmarkable_id }}">
                     <div class="h-48 bg-gray-200 relative">
                         @if($bookmark->bookmarkable->images && count($bookmark->bookmarkable->images) > 0)
-                            <img src="{{ asset('storage/' . $bookmark->bookmarkable->images[0]) }}"
+                            <img src="{{ $bookmark->bookmarkable_type === 'App\\Models\\MarketplaceProduct' ? $bookmark->bookmarkable->main_image : asset('storage/' . $bookmark->bookmarkable->images[0]) }}"
                                  alt="{{ $bookmark->bookmarkable->name }}"
                                  class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
-                                <i class="fas fa-{{ $bookmark->bookmarkable_type === 'App\\Models\\Residence' ? 'building' : 'calendar-alt' }} text-4xl text-gray-400"></i>
+                                <i class="fas fa-{{ $bookmark->bookmarkable_type === 'App\\Models\\MarketplaceProduct' ? 'shopping-bag' : ($bookmark->bookmarkable_type === 'App\\Models\\Residence' ? 'building' : 'calendar-alt') }} text-4xl text-gray-400"></i>
                             </div>
                         @endif
 
@@ -64,7 +73,13 @@
                         </div>
 
                         <!-- Availability Badge -->
-                        @if($bookmark->bookmarkable_type === 'App\\Models\\Residence')
+                        @if($bookmark->bookmarkable_type === 'App\\Models\\MarketplaceProduct')
+                            <div class="absolute bottom-4 right-4">
+                                <span class="bg-orange-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                    Stok: {{ $bookmark->bookmarkable->stock_quantity }}
+                                </span>
+                            </div>
+                        @elseif($bookmark->bookmarkable_type === 'App\\Models\\Residence')
                             <div class="absolute bottom-4 right-4">
                                 <span class="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium">
                                     {{ $bookmark->bookmarkable->available_slots }} tersedia
@@ -83,7 +98,45 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $bookmark->bookmarkable->name }}</h3>
                         <p class="text-gray-600 text-sm mb-3">{{ Str::limit($bookmark->bookmarkable->description, 100) }}</p>
 
-                        @if($bookmark->bookmarkable_type === 'App\\Models\\Residence')
+                        @if($bookmark->bookmarkable_type === 'App\\Models\\MarketplaceProduct')
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>{{ Str::limit($bookmark->bookmarkable->location, 30) }}</span>
+                            </div>
+
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <i class="fas fa-tag mr-2 text-gray-400"></i>
+                                    <span class="text-sm text-gray-600">{{ $bookmark->bookmarkable->condition_label }}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-eye text-gray-400 mr-1"></i>
+                                    <span class="text-sm font-medium">{{ $bookmark->bookmarkable->views_count }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    @if($bookmark->bookmarkable->discount_percentage > 0)
+                                        <div class="text-sm text-gray-500 line-through">
+                                            Rp {{ number_format($bookmark->bookmarkable->original_price) }}
+                                        </div>
+                                        <div class="text-xl font-bold text-orange-600">
+                                            Rp {{ number_format($bookmark->bookmarkable->price) }}
+                                        </div>
+                                    @else
+                                        <div class="text-xl font-bold text-orange-600">
+                                            Rp {{ number_format($bookmark->bookmarkable->price) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <a href="{{ route('marketplace.show', $bookmark->bookmarkable) }}"
+                                   class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Lihat Detail
+                                </a>
+                            </div>
+
+                        @elseif($bookmark->bookmarkable_type === 'App\\Models\\Residence')
                             <div class="flex items-center text-sm text-gray-500 mb-3">
                                 <i class="fas fa-map-marker-alt mr-2"></i>
                                 <span>{{ Str::limit($bookmark->bookmarkable->address, 30) }}</span>
@@ -186,6 +239,8 @@
                         Belum ada residence yang disimpan
                     @elseif(request('type') === 'activity')
                         Belum ada kegiatan yang disimpan
+                    @elseif(request('type') === 'marketplace')
+                        Belum ada produk yang disimpan
                     @else
                         Belum ada bookmark
                     @endif
@@ -195,8 +250,10 @@
                         Simpan residence favorit Anda untuk akses cepat.
                     @elseif(request('type') === 'activity')
                         Simpan kegiatan menarik untuk referensi nanti.
+                    @elseif(request('type') === 'marketplace')
+                        Simpan produk favorit Anda untuk dilihat nanti.
                     @else
-                        Mulai simpan residence dan kegiatan favorit Anda.
+                        Mulai simpan residence, kegiatan, dan produk favorit Anda.
                     @endif
                 </p>
                 <div class="flex justify-center space-x-4">

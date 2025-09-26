@@ -16,6 +16,9 @@ use App\Http\Controllers\Provider\BookingManagementController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\User\ProfileController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\MarketplaceTransactionController;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -37,6 +40,10 @@ Route::get('/residences/{residence}', [UserResidenceController::class, 'show'])-
 Route::get('/activities', [UserActivityController::class, 'index'])->name('activities.index');
 Route::get('/activities/{activity}', [UserActivityController::class, 'show'])->name('activities.show');
 
+// Marketplace Routes (Public - can view without login)
+Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/{product}', [MarketplaceController::class, 'show'])->name('marketplace.show');
+
 // Authentication required routes
 Route::middleware('auth')->group(function () {
 
@@ -47,9 +54,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:user')->prefix('user')->name('user.')->group(function () {
 
         // Dashboard
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/history', [UserDashboardController::class, 'history'])->name('history');
 
         // Bookings
         Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
@@ -69,6 +75,24 @@ Route::middleware('auth')->group(function () {
         Route::get('/ratings', [RatingController::class, 'show'])->name('ratings.show');
         Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
         Route::delete('/ratings', [RatingController::class, 'destroy'])->name('ratings.destroy');
+    });
+
+    // Marketplace Routes (Authentication required)
+    Route::prefix('marketplace')->name('marketplace.')->group(function () {
+        // Public routes (available to all authenticated users)
+        Route::get('/bookmarks', [MarketplaceController::class, 'bookmarks'])->name('bookmarks');
+        Route::post('/{product}/bookmark', [MarketplaceController::class, 'toggleBookmark'])->name('bookmark');
+
+        // Transaction Routes (available to all authenticated users)
+        Route::prefix('transactions')->name('transactions.')->group(function () {
+            Route::get('/', [MarketplaceTransactionController::class, 'index'])->name('index');
+            Route::get('/create/{product}', [MarketplaceTransactionController::class, 'create'])->name('create');
+            Route::post('/{product}', [MarketplaceTransactionController::class, 'store'])->name('store');
+            Route::get('/{transaction}', [MarketplaceTransactionController::class, 'show'])->name('show');
+            Route::put('/{transaction}/status', [MarketplaceTransactionController::class, 'updateStatus'])->name('update-status');
+            Route::post('/{transaction}/upload-payment-proof', [MarketplaceTransactionController::class, 'uploadPaymentProof'])->name('upload-payment-proof');
+            Route::post('/{transaction}/rate', [MarketplaceTransactionController::class, 'rate'])->name('rate');
+        });
     });
 
     // Provider routes
@@ -93,6 +117,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/bookings/{booking}', [BookingManagementController::class, 'show'])->name('bookings.show');
         Route::patch('/bookings/{booking}/approve', [BookingManagementController::class, 'approve'])->name('bookings.approve');
         Route::patch('/bookings/{booking}/reject', [BookingManagementController::class, 'reject'])->name('bookings.reject');
+
+        // Marketplace Product Management (Provider only)
+        Route::prefix('marketplace')->name('marketplace.')->group(function () {
+            Route::get('/create', [MarketplaceController::class, 'create'])->name('create');
+            Route::post('/', [MarketplaceController::class, 'store'])->name('store');
+            Route::get('/edit/{product}', [MarketplaceController::class, 'edit'])->name('edit');
+            Route::put('/{product}', [MarketplaceController::class, 'update'])->name('update');
+            Route::delete('/{product}', [MarketplaceController::class, 'destroy'])->name('destroy');
+            Route::get('/my-products', [MarketplaceController::class, 'myProducts'])->name('my-products');
+        });
     });
 
     // Admin routes

@@ -280,6 +280,7 @@
                     <ul class="space-y-3">
                         <li><a href="{{ route('residences.index') }}" class="text-gray-400 hover:text-white transition-colors">Residence</a></li>
                         <li><a href="{{ route('activities.index') }}" class="text-gray-400 hover:text-white transition-colors">Kegiatan Kampus</a></li>
+                        <li><a href="{{ route('marketplace.index') }}" class="text-gray-400 hover:text-white transition-colors">Marketplace</a></li>
                         <li><a href="{{ route('search') }}" class="text-gray-400 hover:text-white transition-colors">Cari</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Customer Support</a></li>
                     </ul>

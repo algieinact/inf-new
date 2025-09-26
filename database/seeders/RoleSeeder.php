@@ -14,8 +14,8 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             ['name' => 'admin', 'display_name' => 'Administrator', 'description' => 'System administrator with full access'],
-            ['name' => 'provider', 'display_name' => 'Provider', 'description' => 'Service provider who offers residences and activities'],
-            ['name' => 'user', 'display_name' => 'User', 'description' => 'Regular user who can book residences and activities'],
+            ['name' => 'provider', 'display_name' => 'Provider', 'description' => 'Service provider who offers residences, marketplace products and activities'],
+            ['name' => 'user', 'display_name' => 'User', 'description' => 'Regular user who can book residences, marketplace products and activities'],
         ];
 
         foreach ($roles as $role) {
@@ -23,21 +23,3 @@ class RoleSeeder extends Seeder
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

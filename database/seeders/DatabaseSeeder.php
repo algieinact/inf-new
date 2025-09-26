@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
         // Seed roles first
         $this->call(RoleSeeder::class);
 
+        // Seed product categories
+        $this->call(ProductCategorySeeder::class);
+
         // Create demo users
         $this->createDemoUsers();
     }

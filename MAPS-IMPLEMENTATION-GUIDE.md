@@ -204,3 +204,4 @@ ALTER TABLE residences ADD COLUMN longitude DECIMAL(11,8) NULL AFTER latitude;
 
 
 
+
