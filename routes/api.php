@@ -78,21 +78,26 @@ Route::prefix('v1')->group(function () {
         });
 
         // Provider endpoints
-        Route::middleware('role:provider')->prefix('provider')->group(function () {
+        Route::middleware('role:provider')->prefix('provider')->name('provider.')->group(function () {
             Route::get('/dashboard', [ProviderDashboardController::class, 'index']);
-            Route::apiResource('residences', ProviderResidenceController::class);
-            Route::patch('/residences/{residence}/toggle-status', [ProviderResidenceController::class, 'toggleStatus']);
-            Route::apiResource('activities', ProviderActivityController::class);
-            Route::patch('/activities/{activity}/toggle-status', [ProviderActivityController::class, 'toggleStatus']);
-            Route::get('/bookings', [ProviderBookingManagementController::class, 'index']);
-            Route::get('/bookings/{booking}', [ProviderBookingManagementController::class, 'show']);
-            Route::patch('/bookings/{booking}/approve', [ProviderBookingManagementController::class, 'approve']);
-            Route::patch('/bookings/{booking}/reject', [ProviderBookingManagementController::class, 'reject']);
-            Route::get('/dashboard', [ProviderDashboardController::class, 'index']);
-            Route::get('/dashboard/charts', [ProviderDashboardController::class, 'getChartData']);
-            Route::get('/dashboard/stats', [ProviderDashboardController::class, 'getStats']);
-            Route::get('/dashboard/export', [ProviderDashboardController::class, 'exportData']);
+            Route::apiResource('residences', ProviderResidenceController::class)->names('residences');
+            Route::patch('/residences/{residence}/toggle-status', [ProviderResidenceController::class, 'toggleStatus'])
+                ->name('residences.toggle-status');
+
+            Route::apiResource('activities', ProviderActivityController::class)->names('activities');
+            Route::patch('/activities/{activity}/toggle-status', [ProviderActivityController::class, 'toggleStatus'])
+                ->name('activities.toggle-status');
+
+            Route::get('/bookings', [ProviderBookingManagementController::class, 'index'])->name('bookings.index');
+            Route::get('/bookings/{booking}', [ProviderBookingManagementController::class, 'show'])->name('bookings.show');
+            Route::patch('/bookings/{booking}/approve', [ProviderBookingManagementController::class, 'approve'])->name('bookings.approve');
+            Route::patch('/bookings/{booking}/reject', [ProviderBookingManagementController::class, 'reject'])->name('bookings.reject');
+
+            Route::get('/dashboard/charts', [ProviderDashboardController::class, 'getChartData'])->name('dashboard.charts');
+            Route::get('/dashboard/stats', [ProviderDashboardController::class, 'getStats'])->name('dashboard.stats');
+            Route::get('/dashboard/export', [ProviderDashboardController::class, 'exportData'])->name('dashboard.export');
         });
+
 
         // Admin endpoints
         Route::middleware('role:admin')->prefix('admin')->group(function () {
