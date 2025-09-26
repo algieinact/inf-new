@@ -2,6 +2,11 @@
 
 @section('title', $residence->name . ' - Infoma')
 
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="{{ asset('css/leaflet-maps.css') }}">
+@endpush
+
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,6 +88,22 @@
                         <p class="text-gray-700 leading-relaxed">{{ $residence->description }}</p>
                     </div>
                 </div>
+
+                @if($residence->latitude && $residence->longitude)
+                <!-- Location Map -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-map-marker-alt mr-2 text-blue-600"></i>Lokasi Residence
+                    </h3>
+                    <div class="map-container">
+                        <div id="residence-detail-map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+                        <div class="mt-4 text-sm text-gray-600">
+                            <p><strong>Alamat:</strong> {{ $residence->address }}</p>
+                            <p><strong>Koordinat:</strong> {{ number_format($residence->latitude, 6) }}, {{ number_format($residence->longitude, 6) }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Facilities -->
                 @if($residence->facilities && count($residence->facilities) > 0)
@@ -252,6 +273,7 @@
 
 @auth
 @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 function toggleBookmark(id, type) {
     const button = event.target.closest('button');
@@ -431,6 +453,27 @@ function showNotification(message, type) {
         notification.remove();
     }, 3000);
 }
+
+// Initialize map for residence detail
+@if($residence->latitude && $residence->longitude)
+document.addEventListener('DOMContentLoaded', function() {
+    const map = L.map('residence-detail-map').setView([{{ $residence->latitude }}, {{ $residence->longitude }}], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([{{ $residence->latitude }}, {{ $residence->longitude }}])
+        .addTo(map)
+        .bindPopup(`
+            <div>
+                <strong>{{ $residence->name }}</strong><br>
+                {{ $residence->address }}
+            </div>
+        `)
+        .openPopup();
+});
+@endif
 </script>
 @endpush
 @endauth

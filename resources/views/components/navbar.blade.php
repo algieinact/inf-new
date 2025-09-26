@@ -40,13 +40,13 @@
                             <button @click="open = !open"
                                     class="bg-white flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <span class="sr-only">Open user menu</span>
-                                <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+                                <div class="h-8 w-8 rounded-full bg-blue-900 flex items-center justify-center">
                                     <span class="text-white text-sm font-medium">
                                         {{ substr(auth()->user()->name, 0, 1) }}
                                     </span>
                                 </div>
-                                <span class="ml-2 text-gray-700 font-medium">{{ auth()->user()->name }}</span>
-                                <i class="fas fa-chevron-down ml-1 text-gray-400"></i>
+                                <span class="ml-2 text-gray-700 font-medium icon-container">{{ auth()->user()->name }}</span>
+                                <i class="fas fa-chevron-down ml-1 text-gray-400 icon-container"></i>
                             </button>
                         </div>
 

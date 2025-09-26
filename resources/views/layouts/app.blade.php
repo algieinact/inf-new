@@ -74,22 +74,7 @@
             z-index: 1;
         }
 
-        /* Loading state prevention */
-        body.loading .fas,
-        body.loading .fa,
-        body.loading .fab,
-        body.loading .fal,
-        body.loading .far {
-            visibility: hidden;
-        }
-
-        body.loaded .fas,
-        body.loaded .fa,
-        body.loaded .fab,
-        body.loaded .fal,
-        body.loaded .far {
-            visibility: visible !important;
-        }
+        /* Removed body loading visibility toggles to prevent icons from disappearing */
 
         /* Fallback styling for emoji */
         .fallback-icon {
@@ -193,8 +178,7 @@
             }
         };
 
-        // Set loading state initially
-        document.body.classList.add('loading');
+        // Removed initial 'loading' state to avoid unintended icon hiding
     </script>
 
     <!-- Additional CSS -->
@@ -209,7 +193,7 @@
     <main class="min-h-screen">
         <!-- Flash Messages -->
         @if(session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mx-4 mt-4 rounded">
+            <div class="flash-alert bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mx-4 mt-4 rounded">
                 <div class="flex">
                     <div class="flex-shrink-0 icon-container">
                         <i class="fas fa-check-circle text-green-500" data-fallback="✅"></i>
@@ -222,7 +206,7 @@
         @endif
 
         @if(session('error'))
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mx-4 mt-4 rounded">
+            <div class="flash-alert bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mx-4 mt-4 rounded">
                 <div class="flex">
                     <div class="flex-shrink-0 icon-container">
                         <i class="fas fa-exclamation-circle text-red-500" data-fallback="❌"></i>
@@ -235,7 +219,7 @@
         @endif
 
         @if(session('warning'))
-            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mx-4 mt-4 rounded">
+            <div class="flash-alert bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mx-4 mt-4 rounded">
                 <div class="flex">
                     <div class="flex-shrink-0 icon-container">
                         <i class="fas fa-exclamation-triangle text-yellow-500" data-fallback="⚠️"></i>
@@ -248,7 +232,7 @@
         @endif
 
         @if(session('info'))
-            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mx-4 mt-4 rounded">
+            <div class="flash-alert bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mx-4 mt-4 rounded">
                 <div class="flex">
                     <div class="flex-shrink-0 icon-container">
                         <i class="fas fa-info-circle text-blue-500" data-fallback="ℹ️"></i>
@@ -340,9 +324,9 @@
             }, 500);
         });
 
-        // Auto hide flash messages
+        // Auto hide flash messages (target only flash alerts)
         setTimeout(function() {
-            const alerts = document.querySelectorAll('.bg-green-100, .bg-red-100, .bg-yellow-100, .bg-blue-100');
+            const alerts = document.querySelectorAll('.flash-alert');
             alerts.forEach(alert => {
                 alert.style.transition = 'opacity 0.5s';
                 alert.style.opacity = '0';

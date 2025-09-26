@@ -13,6 +13,8 @@ class ResidenceResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'address' => $this->address,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
             'rental_period' => $this->rental_period,
             'price' => $this->price,
             'capacity' => $this->capacity,

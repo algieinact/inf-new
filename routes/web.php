@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
 
         // Dashboard
         Route::get('/dashboard', [ProviderDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/charts-data', [ProviderDashboardController::class, 'getChartsData'])->name('dashboard.charts');
 
         // Residences Management
         Route::resource('residences', ProviderResidenceController::class);

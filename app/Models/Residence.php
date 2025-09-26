@@ -15,6 +15,8 @@ class Residence extends Model
         'name',
         'description',
         'address',
+        'latitude',
+        'longitude',
         'rental_period',
         'price',
         'capacity',
@@ -30,6 +32,8 @@ class Residence extends Model
         'facilities' => 'array',
         'images' => 'array',
         'is_active' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     public function getPricePerMonthAttribute()

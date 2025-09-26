@@ -13,6 +13,8 @@ class ActivityResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'location' => $this->location,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
             'event_date' => $this->event_date,
             'registration_deadline' => $this->registration_deadline,
             'price' => $this->price,

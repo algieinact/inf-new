@@ -18,6 +18,8 @@ class StoreActivityRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'location' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'event_date' => 'required|date|after:now',
             'registration_deadline' => 'required|date|before:event_date',
             'price' => 'required|numeric|min:0',
@@ -40,6 +42,10 @@ class StoreActivityRequest extends FormRequest
             'description.required' => 'Deskripsi wajib diisi',
             'location.required' => 'Lokasi wajib diisi',
             'location.max' => 'Lokasi maksimal 255 karakter',
+            'latitude.numeric' => 'Latitude harus berupa angka',
+            'latitude.between' => 'Latitude harus antara -90 dan 90',
+            'longitude.numeric' => 'Longitude harus berupa angka',
+            'longitude.between' => 'Longitude harus antara -180 dan 180',
             'event_date.required' => 'Tanggal event wajib diisi',
             'event_date.date' => 'Tanggal event harus berupa tanggal yang valid',
             'event_date.after' => 'Tanggal event harus setelah hari ini',
@@ -65,6 +71,13 @@ class StoreActivityRequest extends FormRequest
         ];
     }
 }
+
+
+
+
+
+
+
 
 
 

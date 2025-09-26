@@ -2,6 +2,12 @@
 
 @section('title', 'Tambah Kegiatan - Infoma')
 
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.css" />
+<link rel="stylesheet" href="{{ asset('css/leaflet-maps.css') }}">
+@endpush
+
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,9 +48,9 @@
                         @error('category_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi <span class="text-red-500">*</span></label>
-                        <input type="text" name="location" required value="{{ old('location') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('location') border-red-500 @enderror" placeholder="Lokasi kegiatan">
+                        <input type="text" name="location" id="location" required value="{{ old('location') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('location') border-red-500 @enderror" placeholder="Lokasi kegiatan">
                         @error('location')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
@@ -58,6 +64,45 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Batas Registrasi <span class="text-red-500">*</span></label>
                         <input type="datetime-local" name="registration_deadline" required value="{{ old('registration_deadline') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent @error('registration_deadline') border-red-500 @enderror">
                         @error('registration_deadline')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Peta Lokasi</h2>
+                <p class="text-sm text-gray-600 mb-4">Pilih lokasi kegiatan di peta atau gunakan pencarian untuk menemukan alamat</p>
+
+                <div class="map-container">
+                    <div class="map-controls">
+                        <button type="button" onclick="activityMap.getCurrentLocation()" class="btn btn-primary">
+                            <i class="fas fa-location-arrow mr-2"></i>Lokasi Saat Ini
+                        </button>
+                        <button type="button" onclick="activityMap.clearLocation()" class="btn btn-danger">
+                            <i class="fas fa-times mr-2"></i>Hapus Lokasi
+                        </button>
+                    </div>
+
+                    <div id="activity-map"></div>
+
+                    <div class="coordinates-display">
+                        <div class="form-group">
+                            <label for="latitude">Latitude</label>
+                            <input type="number" name="latitude" id="latitude" step="any" value="{{ old('latitude') }}" class="@error('latitude') border-red-500 @enderror" placeholder="0.000000">
+                            @error('latitude')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="longitude">Longitude</label>
+                            <input type="number" name="longitude" id="longitude" step="any" value="{{ old('longitude') }}" class="@error('longitude') border-red-500 @enderror" placeholder="0.000000">
+                            @error('longitude')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+
+                    <div class="map-info">
+                        <h4><i class="fas fa-info-circle mr-2"></i>Cara Menggunakan Peta</h4>
+                        <p>• Klik pada peta untuk memilih lokasi<br>
+                        • Gunakan kotak pencarian di atas peta untuk mencari alamat<br>
+                        • Ketik di kolom "Lokasi" untuk mencari alamat secara otomatis<br>
+                        • Koordinat akan terisi otomatis saat Anda memilih lokasi</p>
                     </div>
                 </div>
             </div>
@@ -127,6 +172,9 @@
 </div>
 
 @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.js"></script>
+<script src="{{ asset('js/leaflet-maps.js') }}"></script>
 <script>
 document.getElementById('discount_type').addEventListener('change', function() {
     const discountValue = document.getElementById('discount_value');
@@ -148,6 +196,12 @@ document.getElementById('discount_type').addEventListener('change', function() {
 </script>
 @endpush
 @endsection
+
+
+
+
+
+
 
 
 

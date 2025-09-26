@@ -16,6 +16,8 @@ class Activity extends Model
         'name',
         'description',
         'location',
+        'latitude',
+        'longitude',
         'event_date',
         'registration_deadline',
         'price',
@@ -32,6 +34,8 @@ class Activity extends Model
         'is_active' => 'boolean',
         'event_date' => 'datetime',
         'registration_deadline' => 'datetime',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     public function getDiscountedPrice(): float

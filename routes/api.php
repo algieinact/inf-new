@@ -13,7 +13,7 @@ use App\Http\Controllers\Api\User\BookmarkController as UserBookmarkController;
 use App\Http\Controllers\Api\User\RatingController as UserRatingController;
 use App\Http\Controllers\Api\Provider\DashboardController as ProviderDashboardController;
 use App\Http\Controllers\Api\Provider\ResidenceController as ProviderResidenceController;
-use App\Http\Controllers\Api\Provider\ActivityController as ProviderActivityController;
+use App\Http\Controllers\Api\Provider\ActivityController as ProviderActivityController;;
 use App\Http\Controllers\Api\Provider\BookingManagementController as ProviderBookingManagementController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -88,6 +88,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/bookings/{booking}', [ProviderBookingManagementController::class, 'show']);
             Route::patch('/bookings/{booking}/approve', [ProviderBookingManagementController::class, 'approve']);
             Route::patch('/bookings/{booking}/reject', [ProviderBookingManagementController::class, 'reject']);
+            Route::get('/dashboard', [ProviderDashboardController::class, 'index']);
+            Route::get('/dashboard/charts', [ProviderDashboardController::class, 'getChartData']);
+            Route::get('/dashboard/stats', [ProviderDashboardController::class, 'getStats']);
+            Route::get('/dashboard/export', [ProviderDashboardController::class, 'exportData']);
         });
 
         // Admin endpoints
