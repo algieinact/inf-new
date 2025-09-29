@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Residence;
 use App\Models\Activity;
 use App\Models\MarketplaceProduct;
+use App\Models\MarketplaceTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -40,7 +42,22 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        return view('user.dashboard', compact('residences', 'activities', 'products'));
+        // Get user's recent marketplace transactions (limit to 3)
+        $recentTransactions = MarketplaceTransaction::where('buyer_id', Auth::id())
+            ->with(['product', 'seller'])
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        // Get marketplace transaction statistics for the user
+        $marketplaceStats = [
+            'total_transactions' => MarketplaceTransaction::where('buyer_id', Auth::id())->count(),
+            'pending_transactions' => MarketplaceTransaction::where('buyer_id', Auth::id())->where('status', 'pending')->count(),
+            'completed_transactions' => MarketplaceTransaction::where('buyer_id', Auth::id())->where('status', 'completed')->count(),
+            'total_spent' => MarketplaceTransaction::where('buyer_id', Auth::id())->where('status', 'completed')->sum('total_amount'),
+        ];
+
+        return view('user.dashboard', compact('residences', 'activities', 'products', 'recentTransactions', 'marketplaceStats'));
     }
 
     /**

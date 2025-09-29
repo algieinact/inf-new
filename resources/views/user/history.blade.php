@@ -49,7 +49,7 @@
             </a>
 
             @if(isset($transactions) && $transactions->count() > 0)
-            <a href="{{ route('marketplace.transactions.index') }}"
+            <a href="{{ route('user.marketplace.transactions.index') }}"
                class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-200 group">
                 <div class="flex items-center">
                     <div class="bg-green-100 rounded-lg p-3 group-hover:bg-green-200 transition-colors">

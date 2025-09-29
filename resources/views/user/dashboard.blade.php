@@ -112,19 +112,119 @@
                 </div>
             </a>
 
-            <a href="{{ route('user.history') }}"
+            <a href="{{ route('user.marketplace.transactions.index') }}"
                 class="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-all duration-200 group hover:scale-105">
                 <div class="flex items-center">
-                    <div class="bg-purple-100 rounded-lg p-2 group-hover:bg-purple-200 transition-colors">
-                        <i class="fas fa-history text-purple-600 text-lg"></i>
+                    <div class="bg-indigo-100 rounded-lg p-2 group-hover:bg-indigo-200 transition-colors">
+                        <i class="fas fa-receipt text-indigo-600 text-lg"></i>
                     </div>
                     <div class="ml-3">
-                        <h3 class="text-base font-semibold text-gray-900">My History</h3>
-                        <p class="text-gray-600 text-xs">Riwayat aktivitas</p>
+                        <h3 class="text-base font-semibold text-gray-900">Transaksi</h3>
+                        <p class="text-gray-600 text-xs">Marketplace saya</p>
                     </div>
                 </div>
             </a>
         </div>
+
+        <!-- Marketplace Transaction Summary -->
+        @if($marketplaceStats['total_transactions'] > 0)
+        <div class="mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Ringkasan Transaksi Marketplace</h2>
+                    <a href="{{ route('user.marketplace.transactions.index') }}"
+                        class="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center">
+                        Lihat semua <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                    </a>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 rounded-lg p-2">
+                                <i class="fas fa-shopping-cart text-blue-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-600">Total Transaksi</p>
+                                <p class="text-lg font-bold text-gray-900">{{ $marketplaceStats['total_transactions'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 rounded-lg p-2">
+                                <i class="fas fa-clock text-yellow-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-600">Menunggu</p>
+                                <p class="text-lg font-bold text-gray-900">{{ $marketplaceStats['pending_transactions'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 rounded-lg p-2">
+                                <i class="fas fa-check-circle text-green-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-600">Selesai</p>
+                                <p class="text-lg font-bold text-gray-900">{{ $marketplaceStats['completed_transactions'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 rounded-lg p-2">
+                                <i class="fas fa-money-bill-wave text-purple-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-600">Total Belanja</p>
+                                <p class="text-lg font-bold text-gray-900">Rp {{ number_format($marketplaceStats['total_spent'], 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                @if($recentTransactions->count() > 0)
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Transaksi Terbaru</h3>
+                    <div class="space-y-3">
+                        @foreach($recentTransactions as $transaction)
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <img src="{{ $transaction->product->main_image }}"
+                                         class="w-12 h-12 rounded-lg object-cover"
+                                         alt="{{ $transaction->product->name }}">
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-900">{{ $transaction->product->name }}</h4>
+                                    <p class="text-xs text-gray-600">{{ $transaction->created_at->format('d M Y') }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-blue-600">Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}</p>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                    @if($transaction->status == 'completed') bg-green-100 text-green-800
+                                    @elseif($transaction->status == 'pending') bg-yellow-100 text-yellow-800
+                                    @elseif($transaction->status == 'cancelled') bg-red-100 text-red-800
+                                    @else bg-blue-100 text-blue-800 @endif">
+                                    {{ $transaction->status_label }}
+                                </span>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
 
         <!-- Featured Residences -->
         @if($residences->count() > 0)

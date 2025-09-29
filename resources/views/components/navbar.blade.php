@@ -83,6 +83,10 @@
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-box mr-2"></i>Produk Saya
                                 </a>
+                                <a href="{{ route('provider.marketplace.transactions.index') }}"
+                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-clipboard-list mr-2"></i>Kelola Transaksi
+                                </a>
                             @else
                                 <a href="{{ route('user.dashboard') }}"
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -100,7 +104,7 @@
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-heart mr-2"></i>Bookmark
                                 </a>
-                                <a href="{{ route('marketplace.transactions.index') }}"
+                                <a href="{{ route('user.marketplace.transactions.index') }}"
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-shopping-cart mr-2"></i>Transaksi Marketplace
                                 </a>
@@ -193,6 +197,10 @@
                            class="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
                             <i class="fas fa-box mr-2"></i>Produk Saya
                         </a>
+                        <a href="{{ route('provider.marketplace.transactions.index') }}"
+                           class="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
+                            <i class="fas fa-clipboard-list mr-2"></i>Kelola Transaksi
+                        </a>
                     @else
                         <a href="{{ route('user.dashboard') }}"
                            class="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
@@ -210,7 +218,7 @@
                            class="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
                             <i class="fas fa-heart mr-2"></i>Bookmark
                         </a>
-                        <a href="{{ route('marketplace.transactions.index') }}"
+                        <a href="{{ route('user.marketplace.transactions.index') }}"
                            class="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium">
                             <i class="fas fa-shopping-cart mr-2"></i>Transaksi Marketplace
                         </a>

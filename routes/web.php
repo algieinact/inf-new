@@ -13,10 +13,12 @@ use App\Http\Controllers\Provider\DashboardController as ProviderDashboardContro
 use App\Http\Controllers\Provider\ResidenceController as ProviderResidenceController;
 use App\Http\Controllers\Provider\ActivityController as ProviderActivityController;
 use App\Http\Controllers\Provider\BookingManagementController;
+use App\Http\Controllers\Provider\MarketplaceTransactionController as ProviderMarketplaceTransactionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\MarketplaceTransactionController as UserMarketplaceTransactionController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\MarketplaceTransactionController;
 
@@ -75,6 +77,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/ratings', [RatingController::class, 'show'])->name('ratings.show');
         Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
         Route::delete('/ratings', [RatingController::class, 'destroy'])->name('ratings.destroy');
+
+        // User Marketplace Transactions
+        Route::prefix('marketplace')->name('marketplace.')->group(function () {
+            Route::prefix('transactions')->name('transactions.')->group(function () {
+                Route::get('/', [UserMarketplaceTransactionController::class, 'index'])->name('index');
+                Route::get('/{transaction}', [UserMarketplaceTransactionController::class, 'show'])->name('show');
+                Route::post('/{transaction}/upload-payment-proof', [UserMarketplaceTransactionController::class, 'uploadPaymentProof'])->name('upload-payment-proof');
+                Route::post('/{transaction}/rate', [UserMarketplaceTransactionController::class, 'rate'])->name('rate');
+                Route::patch('/{transaction}/cancel', [UserMarketplaceTransactionController::class, 'cancel'])->name('cancel');
+            });
+        });
     });
 
     // Marketplace Routes (Authentication required)
@@ -83,16 +96,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/bookmarks', [MarketplaceController::class, 'bookmarks'])->name('bookmarks');
         Route::post('/{product}/bookmark', [MarketplaceController::class, 'toggleBookmark'])->name('bookmark');
 
-        // Transaction Routes (available to all authenticated users)
-        Route::prefix('transactions')->name('transactions.')->group(function () {
-            Route::get('/', [MarketplaceTransactionController::class, 'index'])->name('index');
-            Route::get('/create/{product}', [MarketplaceTransactionController::class, 'create'])->name('create');
-            Route::post('/{product}', [MarketplaceTransactionController::class, 'store'])->name('store');
-            Route::get('/{transaction}', [MarketplaceTransactionController::class, 'show'])->name('show');
-            Route::put('/{transaction}/status', [MarketplaceTransactionController::class, 'updateStatus'])->name('update-status');
-            Route::post('/{transaction}/upload-payment-proof', [MarketplaceTransactionController::class, 'uploadPaymentProof'])->name('upload-payment-proof');
-            Route::post('/{transaction}/rate', [MarketplaceTransactionController::class, 'rate'])->name('rate');
-        });
+        // Transaction Routes (create and store - available to all authenticated users)
+        Route::get('/transactions/create/{product}', [MarketplaceTransactionController::class, 'create'])->name('transactions.create');
+        Route::post('/transactions/{product}', [MarketplaceTransactionController::class, 'store'])->name('transactions.store');
     });
 
     // Provider routes
@@ -126,6 +132,15 @@ Route::middleware('auth')->group(function () {
             Route::put('/{product}', [MarketplaceController::class, 'update'])->name('update');
             Route::delete('/{product}', [MarketplaceController::class, 'destroy'])->name('destroy');
             Route::get('/my-products', [MarketplaceController::class, 'myProducts'])->name('my-products');
+            
+            // Marketplace Transaction Management (Provider only)
+            Route::prefix('transactions')->name('transactions.')->group(function () {
+                Route::get('/', [ProviderMarketplaceTransactionController::class, 'index'])->name('index');
+                Route::get('/{transaction}', [ProviderMarketplaceTransactionController::class, 'show'])->name('show');
+                Route::put('/{transaction}/status', [ProviderMarketplaceTransactionController::class, 'updateStatus'])->name('update-status');
+                Route::post('/{transaction}/confirm-payment', [ProviderMarketplaceTransactionController::class, 'confirmPayment'])->name('confirm-payment');
+                Route::get('/statistics/data', [ProviderMarketplaceTransactionController::class, 'getStatistics'])->name('statistics');
+            });
         });
     });
 
